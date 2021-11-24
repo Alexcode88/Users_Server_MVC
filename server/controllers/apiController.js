@@ -1,0 +1,114 @@
+const {UserModel} = require( './../models/userModel' );
+
+const APIController = {
+    getAllUsers : function( request, response ){
+        UserModel.getUsers()
+            .then( users => {
+                let userWithoutPassword = users.map( user => {
+                    // Map through comments here if you need to include comments too
+                    return {
+                        firstName : user.firstName,
+                        lastName : user.lastName,
+                        userName : user.userName
+                        //comments : user.comments
+                    }
+                } )
+                response.status( 200 ).json( userWithoutPassword );
+            });
+    },
+    deleteUser : function( request, response ){
+        let userName = request.params.userName;
+
+        UserModel
+            .getUserById( userName )
+            .then( user => {
+                if( user === null ){
+                    throw new Error( "That user doesn't exist" );
+                }
+                else{
+                    UserModel
+                        .deleteUserById( userName )
+                        .then( result => {
+                            response.status( 204 ).end();
+                        });
+                }
+            })
+            .catch( error => {
+                response.statusMessage = error.message;
+                response.status( 404 ).end();
+            })
+
+    },
+    addNewUser : function( request, response ){
+        let { firstName, lastName, userName, password } = request.body;
+
+        if( firstName && lastName && userName && password ){
+            let newUser = {
+                firstName,
+                lastName,
+                userName,
+                password
+//TODO:     Missing validation (Encrypt the password)!
+            };
+
+            UserModel
+                .createUser( newUser )
+                .then( user => {
+                    response.status( 201 ).json( user );
+                });
+        }
+        else{
+            response.statusMessage = "You are missing a field to create a new user ('userName', 'firstName', 'lastName', 'password')";
+            response.status( 406 ).end();
+        }      
+    },
+    updateUser : function( request, response ){
+        let { firstName, lastName, password } = request.body;
+        let userName = request.params.userName;
+
+        let fieldsToUpdate = {}
+
+        if( firstName ){
+            fieldsToUpdate.firstName = firstName;
+        }
+
+        if( lastName ){
+            fieldsToUpdate.lastName = lastName;
+        }
+
+        if( password ){
+//TODO:     Missing validation (Encrypt the new password)!
+            fieldsToUpdate.password = password;
+        }
+        
+        if( Object.keys( fieldsToUpdate ).length === 0 ){
+            response.statusMessage = "You need to provide at least one of the following fields to update the user ('userName', 'firstName', 'lastName', 'password')";
+            response.status( 406 ).end();
+        }
+        else{
+            UserModel
+                .getUserById( userName )
+                .then( user => {
+                    if( user === null ){
+                        throw new Error( "That user doesn't exist" );
+                    }
+                    else{
+                        UserModel
+                            .updateUser( userName, fieldsToUpdate )
+                            .then( result => {
+                                response.status( 202 ).json( result );
+                            });
+                    }
+                })
+                .catch( error => {
+                    response.statusMessage = error.message;
+                    response.status( 404 ).end();
+                })
+
+        }
+    }
+}
+
+module.exports = { APIController };
+
+

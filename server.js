@@ -4,6 +4,7 @@ const flash = require( 'express-flash' );
 const path = require( 'path' );
 const {UserRouter} = require( './server/routes/userRouter' );
 const {CommentRouter} = require( './server/routes/commentRouter' );
+const {APIRouter} = require( './server/routes/apiRouter' );
 
 require( './server/config/database' );
 require( 'dotenv' ).config();
@@ -13,9 +14,9 @@ app.set( 'views', __dirname + '/client/views' );
 app.set( 'view engine', 'ejs' );
 app.use(express.static(path.join(__dirname, "/client/static")));
 
-console.log( process.env.SESSION_TOKEN );
 app.use( flash() );
 app.use( express.urlencoded({extended:true}) );
+app.use( express.json() );
 app.use(session({
     secret: process.env.SESSION_TOKEN,
     resave: false,
@@ -25,6 +26,7 @@ app.use(session({
 
 app.use( '/users', UserRouter );
 app.use( '/comments', CommentRouter );
+app.use( '/api', APIRouter );
 
 app.listen( process.env.PORT, function(){
     console.log( "The users server is running in port 8181." );

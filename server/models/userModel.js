@@ -42,6 +42,12 @@ const UserModel = {
             .then( result => {
                 return User.findByIdAndUpdate({_id: id}, {$push: {comments: result}});
             });
+    },
+    deleteUserById : function( userName ){
+        return User.remove( {userName} );
+    },
+    updateUser : function( userName, userToUpdate ){
+        return User.findOneAndUpdate( {userName}, {$set : userToUpdate }, {new : true} )
     }
 };
 
