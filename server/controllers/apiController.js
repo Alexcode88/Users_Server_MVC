@@ -106,6 +106,38 @@ const APIController = {
                 })
 
         }
+    },
+    userLogin : function( request, response ){
+        let userName = request.body.loginUserName;
+        let password = request.body.loginPassword;
+    
+        UserModel
+            .getUserById( userName )
+            .then( result => {
+                if( result === null ){
+                    throw new Error( "That user doesn't exist!" );
+                }
+    
+                bcrypt.compare( password, result.password )
+                    .then( flag => {
+                        if( !flag ){
+                            throw new Error( "Wrong credentials!" );
+                        }
+                        request.session.firstName = result.firstName;
+                        request.session.lastName = result.lastName;
+                        request.session.userName = result.userName;
+    
+                        response.status(200).json( {message: "Succesful login"});
+                    })
+                    .catch( error => {
+                        response.statusMessage = error.message;
+                        response.status(406).end()
+                    }); 
+            })
+            .catch( error => {
+                response.statusMessage = error.message;
+                response.status(404).end();
+            });
     }
 }
 
