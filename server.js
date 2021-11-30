@@ -12,7 +12,7 @@ const app = express();
 
 app.set( 'views', __dirname + '/client/views' );
 app.set( 'view engine', 'ejs' );
-app.use(express.static(path.join(__dirname, "/client/static")));
+app.use(express.static(path.join(__dirname, "/users-client/dist/users-client")));
 
 app.use( flash() );
 app.use( express.urlencoded({extended:true}) );
@@ -27,6 +27,10 @@ app.use(session({
 app.use( '/users', UserRouter );
 app.use( '/comments', CommentRouter );
 app.use( '/api', APIRouter );
+
+app.all( '*', function( request, response ){
+    response.sendFile( path.resolve( './users-client/dist/users-client/index.html' ) );
+});
 
 app.listen( process.env.PORT, function(){
     console.log( "The users server is running in port 8181." );

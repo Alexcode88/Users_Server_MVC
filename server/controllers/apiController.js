@@ -1,4 +1,5 @@
 const {UserModel} = require( './../models/userModel' );
+const bcrypt = require( 'bcrypt' );
 
 const APIController = {
     getAllUsers : function( request, response ){
@@ -126,8 +127,13 @@ const APIController = {
                         request.session.firstName = result.firstName;
                         request.session.lastName = result.lastName;
                         request.session.userName = result.userName;
-    
-                        response.status(200).json( {message: "Succesful login"});
+                        
+                        let currentUser = {
+                            firstName : result.firstName,
+                            lastName : result.lastName,
+                            userName : result.userName
+                        }
+                        response.status(200).json( currentUser );
                     })
                     .catch( error => {
                         response.statusMessage = error.message;
@@ -138,6 +144,26 @@ const APIController = {
                 response.statusMessage = error.message;
                 response.status(404).end();
             });
+    },
+    validateUser : function( request, response ){
+        if( request.session.userName &&
+            request.session.firstName &&
+            request.session.lastName ){
+                let currentUser = {
+                    userName: request.session.userName,
+                    lastName: request.session.lastName,
+                    firstName: request.session.firstName
+                }
+                response.status( 200 ).json( currentUser ); 
+        }
+        else{
+            response.statusMessage = "You need to login to be here!";
+            response.status( 401 ).end();
+        }
+    },
+    userLogout : function( request, response ){
+        request.session.destroy();
+        response.status(200).json({message: "Successfuly destroyed session"}); 
     }
 }
 

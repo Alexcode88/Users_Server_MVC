@@ -3,10 +3,13 @@ const {APIController} = require( './../controllers/apiController' );
 const APIRouter = express.Router();
 
 APIRouter
-    .route( '/users/login', APIController.userLogin );
+    .post( '/users/login', APIController.userLogin );
 
 APIRouter
-    .route( '/users/validate', APIController.validateUser );
+    .get( '/users/logout', APIController.userLogout );
+
+APIRouter
+    .get( '/users/validate', APIController.validateUser );
 
 APIRouter
     .route( '/users' )
